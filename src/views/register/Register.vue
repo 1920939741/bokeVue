@@ -10,10 +10,10 @@
              <el-form-item label="账号" prop="username" style="margin-top: 10px">
               <el-col :span="18">
                   <!-- v-on:mouseleave.native="handleMouseleave()"   -->
-                <el-input 
-                  placeholder="请输入账号"    
+                <el-input
+                  placeholder="请输入账号"
                   @blur="checkUsername"
-                  class="inps" 
+                  class="inps"
                   v-model="ruleForm.username">
                 </el-input>
               </el-col>
@@ -25,9 +25,9 @@
             </el-form-item>
                    <el-form-item label="邮箱" prop="email" style="margin-top: 10px">
               <el-col :span="18">
-                <el-input  
-                  placeholder="请输入邮箱"   
-                  class="inps" 
+                <el-input
+                  placeholder="请输入邮箱"
+                  class="inps"
                   @blur="checkEmail"
                   v-model="ruleForm.email"></el-input>
               </el-col>
@@ -61,6 +61,7 @@
 
 <script>
     import Particles from '@/components/particles/index'
+    import {findByUserName} from '@/api/register'
     export default {
         components: {Particles},
         name: "Register",
@@ -75,7 +76,7 @@
                 rules: {
                     username: [
                         {required: true, message: '请输入胡用户名！', trigger: 'blur'},
-                        {min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur'}, 
+                        {min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur'},
                     ],
                     password: [
                         {required: true, message: '请输入密码！', trigger: 'blur'}
@@ -87,7 +88,7 @@
                       {required: true,message: '请输入邮箱!', trigger: 'blur'},
                       { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
                     ]
-                    
+
 
                 }
             };
@@ -146,30 +147,37 @@
             // handleMouseleave(){
             //   alert(222)
             // },
-            checkUsername(){
-              //alert(this.ruleForm.username)
-              if(this.ruleForm.username == 'admin'){
-                this.$message({
-                      type: 'success',
-                      message: '用户名已存在',
-                 });   
-              }
-              //根据用户名查询
-              // this.$axios.post("/findByUserName", this.ruleForm.username).then(res => {
-              //     if(res.data != null){
-              //          this.$message({
-              //            type: 'success',
-              //            message: '用户名已存在'
-              //          });      
-              //     }
-              // });
+            async checkUsername() {
+                //alert(this.ruleForm.username)
+                // if(this.ruleForm.username == 'admin'){
+                //   this.$message({
+                //         type: 'success',
+                //         message: '用户名已存在',
+                //    });
+                // }
+                //根据用户名查询
+                // this.$axios.post("/findByUserName", this.ruleForm.username).then(res => {
+                //     if(res.data != null){
+                //          this.$message({
+                //            type: 'success',
+                //            message: '用户名已存在'
+                //          });
+                //     }
+                // });
+                const res = await findByUserName(this.ruleForm.username);
+                if (res.data != "" || res.data != null) {
+                    this.$message({
+                        type: 'success',
+                        message: '用户名已存在'
+                    });
+                }
             },
             checkEmail(){
               if(this.ruleForm.email == '123456@qq.com'){
                 this.$message({
                       type: 'success',
                       message: '该邮箱已存在',
-                 });   
+                 });
               }
               //根据邮箱查询
               // this.$axios.post("/findByEmail", this.ruleForm.email).then(res => {
@@ -177,7 +185,7 @@
               //          this.$message({
               //            type: 'success',
               //            message: '该邮箱已存在'
-              //          });      
+              //          });
               //     }
               // });
             },
@@ -189,12 +197,12 @@
               //      this.$message({
               //        type: 'success',
               //        message: '注册成功!'
-              //      });      
+              //      });
               //       _this.$router.push("/login")
               // }
               // });
             }
-          
+
         }
     }
 
