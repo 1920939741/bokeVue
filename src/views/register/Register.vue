@@ -43,7 +43,7 @@
               </el-row>
             </el-form-item> -->
             <el-form-item style="margin-top: 20px ">
-              <el-button type="primary" class="submitBtn" @click="registerUser()">注册</el-button>
+              <el-button type="primary" class="submitBtn" @click="registerSubmit()">注册</el-button>
             </el-form-item>
             <!-- <div class="unlogin">
               <router-link :to="{ path: '/forgetpwd' }"> 忘记密码? </router-link>
@@ -61,7 +61,7 @@
 
 <script>
     import Particles from '@/components/particles/index'
-    import {findByUserName,findByEmail} from '@/api/register'
+    import {findByUserName,findByEmail,saveUser} from '@/api/register'
     export default {
         components: {Particles},
         name: "Register",
@@ -69,7 +69,6 @@
             return {
                 ruleForm: {
                     username: '',
-                    password: '',
                     name:'',
                     email:'',
                 },
@@ -149,7 +148,8 @@
             // },
             async checkUsername() {
                 const res = await findByUserName(this.ruleForm.username);
-                if (res.data != "" || res.data != null) {
+                console.log(res.data);
+                if (res.data != "" && res.data != null) {
                     this.$message({
                         type: 'success',
                         message: '用户名已存在'
@@ -159,7 +159,7 @@
             async checkEmail(){
                 //根据邮箱查询
                 const res = await findByEmail(this.ruleForm.email);
-                if (res.data != "" || res.data != null) {
+                if (res.data != "" && res.data != null) {
                     this.$message({
                         type: 'success',
                         message: '该邮箱已被注册'
@@ -168,17 +168,20 @@
 
             },
             //注册用户
-            registerUser(){
+            async registerSubmit(){
               console.log(this.ruleForm);
-              // this.$axios.post("/registerUser", this.ruleForm).then(res => {
-              // if(res.data != null){
-              //      this.$message({
-              //        type: 'success',
-              //        message: '注册成功!'
-              //      });
-              //       _this.$router.push("/login")
-              // }
-              // });
+                const res = await saveUser(this.ruleForm);
+                if (res.data != "" && res.data != null) {
+                    this.$message({
+                        type: 'success',
+                        message: '注册成功'
+                    });
+                }else{
+                    this.$message({
+                        type: 'failure',
+                        message: '注册失败'
+                    });
+                }
             }
 
         }
