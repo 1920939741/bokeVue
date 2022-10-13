@@ -61,7 +61,7 @@
 
 <script>
     import Particles from '@/components/particles/index'
-    import {findByUserName} from '@/api/register'
+    import {findByUserName,findByEmail} from '@/api/register'
     export default {
         components: {Particles},
         name: "Register",
@@ -148,22 +148,6 @@
             //   alert(222)
             // },
             async checkUsername() {
-                //alert(this.ruleForm.username)
-                // if(this.ruleForm.username == 'admin'){
-                //   this.$message({
-                //         type: 'success',
-                //         message: '用户名已存在',
-                //    });
-                // }
-                //根据用户名查询
-                // this.$axios.post("/findByUserName", this.ruleForm.username).then(res => {
-                //     if(res.data != null){
-                //          this.$message({
-                //            type: 'success',
-                //            message: '用户名已存在'
-                //          });
-                //     }
-                // });
                 const res = await findByUserName(this.ruleForm.username);
                 if (res.data != "" || res.data != null) {
                     this.$message({
@@ -172,22 +156,16 @@
                     });
                 }
             },
-            checkEmail(){
-              if(this.ruleForm.email == '123456@qq.com'){
-                this.$message({
-                      type: 'success',
-                      message: '该邮箱已存在',
-                 });
-              }
-              //根据邮箱查询
-              // this.$axios.post("/findByEmail", this.ruleForm.email).then(res => {
-              //     if(res.data != null){
-              //          this.$message({
-              //            type: 'success',
-              //            message: '该邮箱已存在'
-              //          });
-              //     }
-              // });
+            async checkEmail(){
+                //根据邮箱查询
+                const res = await findByEmail(this.ruleForm.email);
+                if (res.data != "" || res.data != null) {
+                    this.$message({
+                        type: 'success',
+                        message: '该邮箱已被注册'
+                    });
+                }
+
             },
             //注册用户
             registerUser(){

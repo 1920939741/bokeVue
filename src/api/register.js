@@ -7,3 +7,11 @@ export function findByUserName(username) {
         params: { username }
     })
 }
+
+export function findByEmail(email) {
+  return request({
+    url: `/user/findByEmail`,
+    method: 'get',
+    params: { email }
+  })
+}
