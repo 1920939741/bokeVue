@@ -9,8 +9,12 @@ import VueRouter from 'vue-router'
 //注册页面
 import Login from '../views/Login.vue'
 import Blogs from '../views/Blogs.vue'
+import Register from '../views/register/Register.vue'
+import forgetpwd from '../views/forgetpwd.vue'
 import BlogEdit from '../views/BlogEdit.vue'
 import BlogDetail from '../views/BlogDetail.vue'
+import emailPage from '../views/emailPage.vue'
+
 
 
 Vue.use(VueRouter)
@@ -30,6 +34,21 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: Login
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: Register
+    },
+    {
+        path: '/forgetpwd',
+        name: 'forgetpwd',
+        component: forgetpwd
+    },
+    {
+        path: '/emailPage',
+        name: 'emailPage',
+        component: emailPage
     },
     {
         path: '/blog/add',
