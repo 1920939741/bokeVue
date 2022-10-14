@@ -35,3 +35,11 @@ export function saveUser(data) {
     data
   })
 }
+
+export function sendEmailCode(email){
+  return request({
+      url: '/user/sendEmailCode',
+      method: 'post',
+      params: { email }
+  })
+}
