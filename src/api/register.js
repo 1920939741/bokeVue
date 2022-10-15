@@ -36,10 +36,26 @@ export function saveUser(data) {
   })
 }
 
+/**
+ * 发送邮箱验证码
+ * @param email
+ */
 export function sendEmailCode(email){
   return request({
       url: '/user/sendEmailCode',
       method: 'post',
       params: { email }
+  })
+}
+
+/**
+ * 验证邮箱验证码
+ * @param email
+ */
+export function verifyEmailCode(email,code) {
+  return request({
+    url: '/user/verifyEmailCode',
+    method: 'post',
+    params: { email ,code}
   })
 }

@@ -38,8 +38,11 @@
                 <el-input
                   placeholder="请输入邮箱验证码"
                   class="inps"
+                  @blur="verifyEmailCodeBlur"
                   v-model="ruleForm.emailCode">
-                   <el-button slot="append" @click="sendEmailCode()"><template>{{this.content}}</template></el-button>
+                   <el-button slot="append" @click="sendCode()" :disabled="isDisabled">
+                    {{this.content}}
+                  </el-button>
                   </el-input>
               </el-col>
             </el-form-item>
@@ -54,8 +57,9 @@
 </template>
 
 <script>
+    import { Message } from 'element-ui'
     import Particles from '@/components/particles/index'
-    import {findByUserName,findByEmail,saveUser,sendEmailCode} from '@/api/register'
+    import {findByUserName,findByEmail,saveUser,sendEmailCode,verifyEmailCode} from '@/api/register'
     export default {
         components: {Particles},
         name: "Register",
@@ -70,6 +74,7 @@
                 labelPosition: 'right',
                 content:'获取验证码',
                 second: 60,
+                isDisabled: false,
                 rules: {
                     username: [
                         {required: true, message: '请输入胡用户名！', trigger: 'blur'},
@@ -96,6 +101,9 @@
             },
             //检查账号是否存在
             async checkUsername() {
+               if(this.ruleForm.username == "" || this.ruleForm.username == null || this.ruleForm.username == undefined){
+                    return;
+                }
                 const res = await findByUserName(this.ruleForm.username);
                 console.log(res.data);
                 if (res.data != "" && res.data != null) {
@@ -108,6 +116,9 @@
             //检查邮箱是否存在
             async checkEmail(){
                 //根据邮箱查询
+                if(this.ruleForm.email == "" || this.ruleForm.email == null || this.ruleForm.email == undefined){
+                    return;
+                }
                 const res = await findByEmail(this.ruleForm.email);
                 if (res.data != "" && res.data != null) {
                     this.$message({
@@ -136,21 +147,72 @@
                 }
             },
             //发送邮箱验证码
-           async sendEmailCode(){
+           async sendCode(){
+                if(this.ruleForm.email == "" || this.ruleForm.email == null || this.ruleForm.email == undefined){
+                  this.$message({
+                        message: '邮箱不能为空'
+                    });
+                    return;
+                }
                 this.content = "重新获取"+this.second + "s";
                 let clock = window.setInterval(() => {
                       this.second--;
                       this.content = "重新获取"+this.second + "s";
+                      this.isDisabled = true;
                       if (this.second < 1) {
                           //当倒计时小于0时清除定时器
                           window.clearInterval(clock); //关闭
                           this.second = 60;
                           this.content = "获取验证码";
+                          this.isDisabled = false;
                       }
                 }, 1000);
-                //todo
-                //const res =await sendEmailCode(this.ruleForm.email);
-
+                await sendEmailCode(this.ruleForm.email).then(async(response) => {
+                  if (response.code === 200){
+                    console.log(response.data);
+                    if (response.data != "" && response.data != null) {
+                        Message({
+                        message: "发送成功",
+                        type: 'success',
+                        duration: 1000
+                      })
+                    }
+                  }else if(response.code === 508){
+                    Message({
+                      message: response.message,
+                      type: 'failure',
+                      duration: 1000
+                    })
+                  }else{
+                    Message({
+                      message: "服务器错误",
+                      type: 'error',
+                      duration: 1000
+                    })
+                  }
+                });
+            },
+            //验证邮箱验证码
+            verifyEmailCodeBlur(){
+                console.log(this.ruleForm.email+","+this.ruleForm.emailCode);
+                verifyEmailCode(this.ruleForm.email,this.ruleForm.emailCode).then(async(response) => {
+                    if (response.code === 200){
+                        if (response.data == false) {
+                            Message({
+                                message: "验证码错误",
+                                type: 'error',
+                                duration: 1000
+                            })
+                            this.ruleForm.emailCode = '';
+                        }
+                    } else {
+                        Message({
+                            message: "服务器错误",
+                            type: 'error',
+                            duration: 1000
+                        })
+                    }
+                });
             }
 
         }
