@@ -59,3 +59,17 @@ export function verifyEmailCode(email,code) {
     params: { email ,code}
   })
 }
+
+/**
+ * 修改密码
+ * @param newPassword 新密码
+ * @param confirmPassword 确认密码
+ * @returns {AxiosPromise}
+ */
+export function updatePassword(newPassword,confirmPassword){
+  return request({
+    url: '/user/updatePassword',
+    method: 'post',
+    params:{newPassword , confirmPassword}
+  })
+}
