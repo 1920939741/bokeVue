@@ -8,7 +8,7 @@
           <h4>boke帐号安全验证</h4>
           <div>
             <h5>为确认身份，我们仍需验证您的安全邮箱</h5>
-            <p>点击发送邮件按钮，将会发送一封有验证码的邮件至邮箱</p> 
+            <p>点击发送邮件按钮，将会发送一封有验证码的邮件至邮箱</p>
             <p>{{this.$route.query.eamil.replace(this.$route.query.eamil.substring(3,this.$route.query.eamil.lastIndexOf("@")),"***")}}</p>
           </div>
           <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="70px">
@@ -37,9 +37,9 @@
           </div>
           <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" >
             <el-form-item label="" prop="eamilCode" style="margin-top: 10px;">
-                 <el-input  placeholder="请输入邮箱验证码"   class="email-input" @blur="verifyEmailCodeBlur" v-model="ruleForm.email">
+                 <el-input  placeholder="请输入邮箱验证码"   class="email-input" @blur="verifyEmailCodeBlur" v-model="ruleForm.eamilCode">
                     <el-button slot="append" @click="sendEmail()" :disabled="isDisabled">{{this.content}}</el-button>
-                 </el-input> 
+                 </el-input>
             </el-form-item>
             <el-form-item style="margin-top: 30px">
               <el-button type="primary" class="submitBtn" @click="submitCode()">确定</el-button>
@@ -68,10 +68,11 @@
       </div>
     </div>
 
-  
+
 </template>
 
 <script>
+    import { Message } from 'element-ui'
     import Particles from '@/components/particles/index'
     import {sendEmailCode,verifyEmailCode,updatePassword} from '@/api/register'
     export default {
@@ -108,7 +109,7 @@
                 second:60,
                 canClick: true,
                 emailConfirm: false,
-                sendemailDiv: true, 
+                sendemailDiv: true,
                 dialogVisible: false,
                 dialogType: 'new',
                 content:'发送验证码',
@@ -179,7 +180,10 @@
 
             },
              //验证邮箱验证码
-            verifyEmailCodeBlur(){  
+            verifyEmailCodeBlur(){
+
+            },
+            submitCode(){
                 verifyEmailCode(this.$route.query.eamil,this.ruleForm.eamilCode).then(async(response) => {
                     if (response.code === 200){
                         if (response.data == false) {
@@ -189,6 +193,9 @@
                                 duration: 1000
                             })
                             this.ruleForm.eamilCode = '';
+                        }else{
+                            this.dialogVisible = true;
+                            this.dialogType = 'new'
                         }
                     } else {
                         Message({
@@ -199,20 +206,16 @@
                     }
                 });
             },
-            submitCode(){
-              this.dialogVisible = true;
-               this.dialogType = 'new'
-            },
             confirmPwd(){
-              
+
             },
             submitFormPwd(formName) {
               this.$refs[formName].validate((valid) => {
                 if (valid) {
                   this.dialogVisible = false;
                   console.log(this.ruleForm);
-                  updatePassword(this.ruleForm.password,this.ruleForm.newPassword).then(async(response)=>{
-                       if (response.code === 200){
+                  updatePassword(this.$route.query.eamil,this.ruleForm.password,this.ruleForm.newPassword).then(async(response)=>{
+                    if (response.code === 200){
                         if (response.data > 0) {
                             Message({
                                 message: "修改成功",
@@ -220,10 +223,15 @@
                                 duration: 1000
                             })
                             this.ruleForm.eamilCode = '';
+                        }else {
+                            Message({
+                                message: "修改失败",
+                                duration: 1000
+                            })
                         }
                     } else {
                         Message({
-                            message: "修改成功",
+                            message: "服务器错误",
                             type: 'error',
                             duration: 1000
                         })
@@ -234,7 +242,7 @@
                   return false;
                 }
               });
-            
+
             },
             resetForm(formName) {
               this.$refs[formName].resetFields();

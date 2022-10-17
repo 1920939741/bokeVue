@@ -66,10 +66,10 @@ export function verifyEmailCode(email,code) {
  * @param confirmPassword 确认密码
  * @returns {AxiosPromise}
  */
-export function updatePassword(newPassword,confirmPassword){
+export function updatePassword(email,newPassword,confirmPassword){
   return request({
     url: '/user/updatePassword',
     method: 'post',
-    params:{newPassword , confirmPassword}
+    params:{email,newPassword , confirmPassword}
   })
 }

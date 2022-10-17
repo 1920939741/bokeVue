@@ -35,8 +35,9 @@
 </template>
 
 <script>
+  import { Message } from 'element-ui'
   import Particles from "@/components/particles/index";
-
+  import {findByEmail} from '@/api/register'
   export default {
     components: {Particles},
     name: "emailPage",
@@ -62,9 +63,20 @@
         this.message = '可以请求接口了'
       }
     },
-    sendEmail(){
+   async sendEmail(){
       // thsi.eamil = this.emailForm.email.replace(this.emailForm.email.substring(3,this.emailForm.email.lastIndexOf("@")),"***");
-      this.$router.push({path:"/forgetpwd",query:{eamil:this.emailForm.email}})
+        if(this.emailForm.email == "" || this.emailForm.email == null || this.emailForm.email == undefined){
+            return;
+        }
+        const res = await findByEmail(this.emailForm.email);
+        if (res.data != "" && res.data != null) {
+            this.$router.push({path:"/forgetpwd",query:{eamil:this.emailForm.email}})
+        }else{
+            this.$message({
+                type: 'error',
+                message: '该邮箱不存在'
+            });
+        }
 
     }
 
