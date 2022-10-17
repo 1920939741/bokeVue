@@ -14,7 +14,13 @@
                 <span class="el-icon-s-custom"></span>
               </el-col>
               <el-col :span="22">
-                <el-input  placeholder="QQ邮箱"   class="inps" v-model="email" @blur="email_blur"></el-input>
+                <!-- <el-input  placeholder="QQ邮箱"   class="inps" v-model="email" @blur="email_blur"></el-input> -->
+                 <el-input
+                   placeholder="请输入邮箱"
+                    class="inps"
+                    @blur="email_blur"
+                    v-model="emailForm.email">
+                  </el-input>
               </el-col>
             </el-row>
           </el-form-item>
@@ -39,8 +45,9 @@
         emailForm:{
           email:"",
         },
+        eamil: '',
         rules: {
-          username: [
+          email: [
             {required: true, message: 'QQ邮箱号！', trigger: 'blur'},
           ],
         }
@@ -55,6 +62,11 @@
         this.message = '可以请求接口了'
       }
     },
+    sendEmail(){
+      // thsi.eamil = this.emailForm.email.replace(this.emailForm.email.substring(3,this.emailForm.email.lastIndexOf("@")),"***");
+      this.$router.push({path:"/forgetpwd",query:{eamil:this.emailForm.email}})
+
+    }
 
     }
   }

@@ -9,52 +9,99 @@
           <div>
             <h5>为确认身份，我们仍需验证您的安全邮箱</h5>
             <p>点击发送邮件按钮，将会发送一封有验证码的邮件至邮箱</p> 
-            <span>${this.$route,query.email;}</span>
+            <p>{{this.$route.query.eamil.replace(this.$route.query.eamil.substring(3,this.$route.query.eamil.lastIndexOf("@")),"***")}}</p>
           </div>
-          <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" >
-            <el-form-item style="margin-top: 30px">
+          <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="70px">
+            <!-- <el-form-item label="邮箱" prop="email" style="margin-top: 10px">
+              <el-row>
+                <el-col :span="22">
+                    <el-input
+                      placeholder="请输入邮箱"
+                      class="inps"
+                      v-model="ruleForm.email">
+                    </el-input>
+                </el-col>
+              </el-row>
+            </el-form-item> -->
+            <el-form-item style="margin-top: 30px;margin-left:-70px">
               <el-button type="primary" class="submitBtn" @click="sendEmail()">发送邮箱</el-button>
             </el-form-item>
           </el-form>
         </div>
 
 
-    <div class="myForgetpEmail" align="center" v-show="emailConfirm">
+      <div class="myForgetpEmail" align="center" v-show="emailConfirm">
           <h4>boke帐号安全验证</h4>
           <div>
-            <p>请使用安全邮箱317***@qq.com获取验证码</p>
+            <p>请使用安全邮箱{{this.$route.query.eamil.replace(this.$route.query.eamil.substring(3,this.$route.query.eamil.lastIndexOf("@")),"***")}}获取验证码</p>
           </div>
           <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" >
             <el-form-item label="" prop="eamilCode" style="margin-top: 10px;">
-                 <el-input  placeholder="请输入邮箱验证码"   class="email-input" v-model="ruleForm.email">
-                    <el-button slot="append">重新发送<template>{{this.second}}</template>s</el-button>
-                 </el-input>
-              <!-- <el-row>
-                <el-col :span="15">
-                 
-                </el-col>
-              </el-row> -->
+                 <el-input  placeholder="请输入邮箱验证码"   class="email-input" @blur="verifyEmailCodeBlur" v-model="ruleForm.email">
+                    <el-button slot="append" @click="sendEmail()" :disabled="isDisabled">{{this.content}}</el-button>
+                 </el-input> 
             </el-form-item>
             <el-form-item style="margin-top: 30px">
-              <el-button type="primary" class="submitBtn" @click="sendEmail()">确定</el-button>
+              <el-button type="primary" class="submitBtn" @click="submitCode()">确定</el-button>
             </el-form-item>
           </el-form>
         </div>
 
+        <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'修改密码':'重置密码'" width="550px">
+          <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+            <el-form-item label="密码" prop="password">
+              <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="newPassword">
+              <el-input type="password" v-model="ruleForm.newPassword" autocomplete="off"></el-input>
+            </el-form-item>
+             <el-form-item>
+            <el-button type="primary" @click="submitFormPwd('ruleForm')">提交</el-button>
+              <el-button @click="resetForm('ruleForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+          <!-- <div style="text-align:right;">
+            <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+            <el-button type="primary" @click="confirmPwd">确定</el-button>
+          </div> -->
+    </el-dialog>
       </div>
     </div>
+
+  
 </template>
 
 <script>
     import Particles from '@/components/particles/index'
+    import {sendEmailCode,verifyEmailCode,updatePassword} from '@/api/register'
     export default {
         components: {Particles},
         name: "Login",
         data() {
+            var validatePwd = (rule, value, callback) => {
+                if (value === '') {
+                  callback(new Error('请输入密码'));
+                } else {
+                  if (this.ruleForm.newPassword !== '') {
+                    this.$refs.ruleForm.validateField('newPassword');
+                  }
+                  callback();
+                }
+              };
+              var validateNewPwd = (rule, value, callback) => {
+                if (value === '') {
+                  callback(new Error('请再次输入密码'));
+                } else if (value !== this.ruleForm.password) {
+                  callback(new Error('两次输入密码不一致!'));
+                } else {
+                  callback();
+                }
+            };
             return {
                 ruleForm: {
                     username: '',
                     password: '',
+                    newPassword:'',
                     email:'',
                     eamilCode:'',
                 },
@@ -62,13 +109,20 @@
                 canClick: true,
                 emailConfirm: false,
                 sendemailDiv: true, 
+                dialogVisible: false,
+                dialogType: 'new',
+                content:'发送验证码',
+                isDisabled: false,
                 rules: {
                     username: [
                         {required: true, message: '请输入胡用户名！', trigger: 'blur'},
                         {min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur'}
                     ],
                     password: [
-                        {required: true, message: '请输入密码！', trigger: 'blur'}
+                         { validator: validatePwd, trigger: 'blur' }
+                    ],
+                     newPassword: [
+                        { validator: validateNewPwd, trigger: 'blur' }
                     ],
                     email: [
                       {required: true,message: '请输入邮箱!', trigger: 'blur'},
@@ -80,74 +134,110 @@
                 }
             };
         },
-
         methods: {
-
-            /**提交表单**/
-            async submitForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        // alert('submit!');
-                        //提交登录信息
-                        //获取到当前的this对象
-                        const _this = this;
-                        this.$axios.post("/login", this.ruleForm).then(res => {
-
-                            console.log(res.data)
-                            const jwt = res.headers["authorization"]
-                            if (jwt === null){
-                                this.$alert('用户名或密码错误！！', '提示', {
-                                    confirmButtonText: '确定',
-                                    callback: action => {
-                                        // _this.$router.push("/blogs")
-                                    }
-                                });
-                            }else {
-                                const userInfo = res.data.data
-                                console.log(jwt)
-                                console.log(userInfo)
-
-                                //把数据共享出去
-                                _this.$store.commit("SET_TOKEN", jwt);
-                                _this.$store.commit("SET_USERINFO", userInfo);
-
-                                //获取
-                                console.log(_this.$store.getters.getUser)
-                                //页面跳转
-                                _this.$router.push("/blogs")
-                            }
-
-
-                        });
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-            },
-            resetForm(formName) {
-                this.$refs[formName].resetFields();
-            },
-            sendEmail(){
+            async sendEmail(){
                 this.sendemailDiv = false;
                 this.emailConfirm = true;
-                // let time = window.setInterval(function(){
-                //     this.second--;
-                //     if(this.second == 0){
-                //         window.clearInterval(time);
-                //     }
-                // },1000);
+                this.content = "重新发送"+this.second + "s";
                 let clock = window.setInterval(() => {
                     this.second--;
-                    this.content = this.totalTime + "s后重新发送";
+                    this.content = "重新发送"+this.second + "s";
+                    this.isDisabled = true;
                     if (this.second < 0) {
                         //当倒计时小于0时清除定时器
                         window.clearInterval(clock); //关闭
                         this.second = 60;
-                        this.canClick = true; //这里重新开启
+                        this.content = "发送验证码";
+                        this.isDisabled = false;
                     }
              }, 1000);
 
+             await sendEmailCode(this.$route.query.eamil).then(async(response) => {
+                  if (response.code === 200){
+                    console.log(response.data);
+                    if (response.data != "" && response.data != null) {
+                        Message({
+                        message: "发送成功",
+                        type: 'success',
+                        duration: 1000
+                      })
+                    }
+                  }else if(response.code === 508){
+                    Message({
+                      message: response.message,
+                      type: 'failure',
+                      duration: 1000
+                    })
+                  }else{
+                    Message({
+                      message: "服务器错误",
+                      type: 'error',
+                      duration: 1000
+                    })
+                  }
+                });
+
+            },
+             //验证邮箱验证码
+            verifyEmailCodeBlur(){  
+                verifyEmailCode(this.$route.query.eamil,this.ruleForm.eamilCode).then(async(response) => {
+                    if (response.code === 200){
+                        if (response.data == false) {
+                            Message({
+                                message: "验证码错误",
+                                type: 'error',
+                                duration: 1000
+                            })
+                            this.ruleForm.eamilCode = '';
+                        }
+                    } else {
+                        Message({
+                            message: "服务器错误",
+                            type: 'error',
+                            duration: 1000
+                        })
+                    }
+                });
+            },
+            submitCode(){
+              this.dialogVisible = true;
+               this.dialogType = 'new'
+            },
+            confirmPwd(){
+              
+            },
+            submitFormPwd(formName) {
+              this.$refs[formName].validate((valid) => {
+                if (valid) {
+                  this.dialogVisible = false;
+                  console.log(this.ruleForm);
+                  updatePassword(this.ruleForm.password,this.ruleForm.newPassword).then(async(response)=>{
+                       if (response.code === 200){
+                        if (response.data > 0) {
+                            Message({
+                                message: "修改成功",
+                                type: 'success',
+                                duration: 1000
+                            })
+                            this.ruleForm.eamilCode = '';
+                        }
+                    } else {
+                        Message({
+                            message: "修改成功",
+                            type: 'error',
+                            duration: 1000
+                        })
+                    }
+                  });
+                } else {
+                  console.log('error submit!!');
+                  return false;
+                }
+              });
+            
+            },
+            resetForm(formName) {
+              this.$refs[formName].resetFields();
             }
         }
     }
