@@ -31,7 +31,7 @@
 
     //导入公共的Header
     import Header from "../components/Header";
-
+    import { blogs, logout,} from '@/api/index'
     export default {
         name: "Blogs",
         //将Header注册进去
@@ -51,17 +51,22 @@
             //请求指定页的方法
             page(currentPage) {
                 const _this = this;
-                _this.$axios.get("/blogs?currentPage=" + currentPage,{
-                    headers: {
-                        "authorization": localStorage.getItem("token")
-                    }
-                }).then(res => {
+                blogs(currentPage).then(res => {
+                // _this.$axios.get("/blogs?currentPage=" + currentPage,{
+                //     headers: {
+                //         "authorization": localStorage.getItem("token")
+                //     }
+                // }).then(res => {
                     console.log(res)
                     //从获取到的数据中进行赋值
-                    _this.blogs = res.data.data.records
-                    _this.currentPage = res.data.data.current
-                    _this.total = res.data.data.total
-                    _this.pageSize = res.data.data.size
+                    // _this.blogs = res.data.data.records
+                    // _this.currentPage = res.data.data.current
+                    // _this.total = res.data.data.total
+                    // _this.pageSize = res.data.data.size
+                    _this.blogs = res.data.records
+                    _this.currentPage = res.data.current
+                    _this.total = res.data.total
+                    _this.pageSize = res.data.size
                 })
             }
         },

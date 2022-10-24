@@ -45,7 +45,9 @@
 </template>
 
 <script>
+    import { Message } from 'element-ui'
     import Particles from '@/components/particles/index'
+    import { login, logout,} from '@/api/index'
     export default {
         components: {Particles},
         name: "Login",
@@ -78,10 +80,11 @@
                         //提交登录信息
                         //获取到当前的this对象
                         const _this = this;
-                        this.$axios.post("/login", this.ruleForm).then(res => {
-
-                            console.log(res.data)
-                            const jwt = res.headers["authorization"]
+                        console.log(this.ruleForm);
+                        login(this.ruleForm).then(res => {
+                        // this.$axios.post("/login", this.ruleForm).then(res => {
+                            // const jwt = res.headers["authorization"]
+                            const jwt = res.data.authorization
                             if (jwt === null){
                                 this.$alert('用户名或密码错误！！', '提示', {
                                     confirmButtonText: '确定',
@@ -99,7 +102,12 @@
                                 _this.$store.commit("SET_USERINFO", userInfo);
 
                                 //获取
-                                console.log(_this.$store.getters.getUser)
+                                // console.log(_this.$store.getters.getUser)
+                                Message({
+                                    message: "登录成功",
+                                    type: 'success',
+                                    duration: 1000
+                                })
                                 //页面跳转
                                 _this.$router.push("/blogs")
                             }
